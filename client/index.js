@@ -213,6 +213,8 @@ $(async function () {
       // remove html audio element
       $("#audio-" + msg.data).remove()
       // close rtc peer connection
+      dataChannels.get(msg.data).close()
+      dataChannels.delete(msg.data)
       peerConnections.get(msg.data).close()
       peerConnections.delete(msg.data)
 
