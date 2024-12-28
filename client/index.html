@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio chat</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+        integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="index.js"></script>
+
+    <h1>Input Devices</h1>
+
+    <select id="audio-input"></select>
+    <button type="button" id="btn-connect">Connect</button>
+    <button type="button" id="btn-mute">Mute</button>
+
+
+    <div id="connected">
+        <h1>Peers</h1>
+
+
+        <p id="not-connected">Not connected</p>
+
+        <p>
+        <div id="audio" class="peers"></div>
+        </p>
+
+        <h1>Chat</h1>
+        <textarea readonly id="chat" autocomplete="off" rows="10"></textarea>
+        <div><input id="input-chat" autocomplete="off"><button id="btn-send">Send</button></div>
+    </div>
+
+
+</body>
+
+</html>
