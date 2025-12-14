@@ -122,9 +122,10 @@ $(async function () {
   ws.addEventListener("open", () => {
     console.log("websocket connected")
 
+    // keepalive ping
     keepAliveInterval = setInterval(() => {
       send({ "type": "ping", "payload": crypto.randomUUID() }, "server")
-    }, 5000);
+    }, 1000);
   })
 
   ws.addEventListener("close", () => {
