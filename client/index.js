@@ -117,8 +117,19 @@ $(async function () {
     alert("WebSocket connection failed")
   })
 
+  let keepAliveInterval = null;
+
   ws.addEventListener("open", () => {
     console.log("websocket connected")
+
+    keepAliveInterval = setInterval(() => {
+      send({ "type": "ping", "payload": crypto.randomUUID() }, "server")
+    }, 5000);
+  })
+
+  ws.addEventListener("close", () => {
+    alert("WebSocket connection closed")
+    if (keepAliveInterval !== null) clearInterval(keepAliveInterval);
   })
 
   ws.addEventListener("message", async (e) => {
@@ -217,6 +228,8 @@ $(async function () {
       dataChannels.delete(msg.data)
       peerConnections.get(msg.data).close()
       peerConnections.delete(msg.data)
+
+    } else if (msg.type === "pong") {
 
     } else {
 

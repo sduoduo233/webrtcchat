@@ -74,6 +74,15 @@ wss.on("connection", (ws) => {
             return
         }
 
+        if (msg.type === "ping") {
+            ws.send(JSON.stringify({
+                "type": "pong",
+                "from": "server",
+                "to": id
+            }))
+            return
+        }
+
         if (!clients.has(msg.to)) {
             console.log("receiver does not exist", msg.to, id)
             return
