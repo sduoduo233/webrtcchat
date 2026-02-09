@@ -6,7 +6,9 @@ console.log("voice chat server")
 const wss = new WebSocketServer({
     port: 8000,
     perMessageDeflate: false,
+    host: "127.0.0.1"
 })
+
 
 const clients = new Map()
 
