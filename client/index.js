@@ -46,22 +46,58 @@ $(async function () {
     pc.addEventListener("track", (e) => {
       console.log("track", peerId)
       let stream = new MediaStream([e.track])
-      let element = $("<div class=\"peer\"><p></p><audio controls></audio></div>")
+      let element = $("<div class=\"peer\"><span></span> <progress max=\"100\" value=\"0\" class=\"peer-volume-meter\"></progress><br><audio style=\"display: none;\"></audio><label>Volume: <input type=\"range\" min=\"0\" max=\"100\" value=\"100\" class=\"peer-volume\"></label></div>")
 
       element.attr("id", "audio-" + peerId)
       $("#audio").append(element)
-      element.find("p").text(peerId)
-      element.find("audio").get(0).srcObject = stream
-      element.find("audio").get(0).play()
+      element.find("span").text(peerId)
+      let audioEl = element.find("audio").get(0)
+      audioEl.srcObject = stream
+      audioEl.play()
+      element.find(".peer-volume").on("input", function () {
+        audioEl.volume = this.value / 100
+      })
+
+      // Set up volume meter for this peer
+      let peerAudioCtx = new AudioContext()
+      let peerSource = peerAudioCtx.createMediaStreamSource(stream)
+      let peerAnalyser = peerAudioCtx.createAnalyser()
+      peerAnalyser.fftSize = 256
+      peerSource.connect(peerAnalyser)
+      let peerDataArray = new Uint8Array(peerAnalyser.frequencyBinCount)
+      let peerMeter = element.find(".peer-volume-meter")
+
+      function updatePeerVolume() {
+        if (!peerConnections.has(peerId)) {
+          peerAudioCtx.close()
+          return
+        }
+        peerAnalyser.getByteFrequencyData(peerDataArray)
+        let sum = 0
+        for (let j = 0; j < peerDataArray.length; j++) {
+          sum += peerDataArray[j]
+        }
+        let avg = sum / peerDataArray.length
+        let vol = Math.min(100, Math.round(avg * 100 / 128))
+        peerMeter.val(vol)
+        requestAnimationFrame(updatePeerVolume)
+      }
+      updatePeerVolume()
     })
 
   }
 
   // acquire audio input
   let mediaStream = await navigator.mediaDevices.getUserMedia({
-    audio: true
+    audio: {
+      echoCancellation: "remote-only",
+      noiseSuppression: true,
+      autoGainControl: true
+    },
+    video: false
   })
   let audioTracks = mediaStream.getAudioTracks()
+
 
   // choose audio input device
   for (let i = 0; i < audioTracks.length; i++) {
@@ -79,6 +115,28 @@ $(async function () {
   let audioTrack = audioTracks[i]
 
   console.log("audio track", audioTrack)
+
+  // Set up volume meter
+  const audioContext = new AudioContext()
+  const source = audioContext.createMediaStreamSource(new MediaStream([audioTrack]));
+  const analyser = audioContext.createAnalyser()
+  analyser.fftSize = 256
+  source.connect(analyser)
+  const dataArray = new Uint8Array(analyser.frequencyBinCount)
+
+  function updateVolumeMeter() {
+    analyser.getByteFrequencyData(dataArray)
+    let sum = 0
+    for (let i = 0; i < dataArray.length; i++) {
+      sum += dataArray[i]
+    }
+    let average = sum / dataArray.length
+    let volume = Math.min(100, Math.round(average * 100 / 128))
+    $("#volume-meter").val(volume)
+    requestAnimationFrame(updateVolumeMeter)
+  }
+  $("#volume-container").show()
+  updateVolumeMeter()
 
   $("#connected").show()
   $("#not-connected").remove()

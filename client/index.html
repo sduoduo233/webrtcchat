@@ -23,6 +23,11 @@
     <button type="button" id="btn-connect">Connect / 连接</button>
     <button type="button" id="btn-mute">Mute / 静音</button>
 
+    <div id="volume-container" style="display:none; margin-top: 10px;">
+        <label>Volume / 音量：</label>
+        <progress id="volume-meter" max="100" value="0"></progress>
+    </div>
+
     <audio id="join" src="join.mp3"></audio>
     <audio id="leave" src="leave.mp3"></audio>
 
