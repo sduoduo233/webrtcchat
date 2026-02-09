@@ -1,5 +1,10 @@
 $(async function () {
-  const WS = "ws://127.0.0.1:8000/"
+  let WS = "wss://chat.1000005.xyz/ws";
+  if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
+    WS = "ws://localhost:8000/"
+  }
+
+
 
   $("#btn-mute").hide()
   $("#connected").hide()
@@ -83,12 +88,12 @@ $(async function () {
   // mute button
   $("#btn-mute").show()
   $("#btn-mute").on("click", function () {
-    if ($("#btn-mute").text() === "Mute") {
+    if ($("#btn-mute").text() === "Mute / 静音") {
       audioTrack.enabled = false
-      $("#btn-mute").text("Unmute")
+      $("#btn-mute").text("Unmute / 取消静音")
     } else {
       audioTrack.enabled = true
-      $("#btn-mute").text("Mute")
+      $("#btn-mute").text("Mute / 静音")
     }
   })
 
@@ -230,8 +235,16 @@ $(async function () {
       peerConnections.get(msg.data).close()
       peerConnections.delete(msg.data)
 
+      // play leave sound
+      $("#leave").get(0).play()
+
     } else if (msg.type === "pong") {
 
+    } else if (msg.type === "connect") {
+
+      // play join sound
+      $("#join").get(0).play()
+      
     } else {
 
       console.error("unknown message type", msg.type)

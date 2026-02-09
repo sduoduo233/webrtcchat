@@ -42,6 +42,15 @@ wss.on("connection", (ws) => {
             }))
         })
 
+    for (let [k, v] of clients.entries()) {
+        if (k === id) continue;
+        v.send(JSON.stringify({
+            "type": "connect",
+            "data": id,
+            "from": "server",
+            "to": k
+        }))
+    }
 
 
     ws.on("close", () => {

@@ -14,26 +14,31 @@
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="index.js"></script>
 
-    <h1>Input Devices</h1>
+    <h1>Input Devices / 输入设备</h1>
 
     <select id="audio-input"></select>
-    <button type="button" id="btn-connect">Connect</button>
-    <button type="button" id="btn-mute">Mute</button>
 
+    <br><br>
+
+    <button type="button" id="btn-connect">Connect / 连接</button>
+    <button type="button" id="btn-mute">Mute / 静音</button>
+
+    <audio id="join" src="join.mp3"></audio>
+    <audio id="leave" src="leave.mp3"></audio>
 
     <div id="connected">
-        <h1>Peers</h1>
+        <h1>Peers / 连接的用户</h1>
 
 
-        <p id="not-connected">Not connected</p>
+        <p id="not-connected">Not connected / 未连接</p>
 
         <p>
         <div id="audio" class="peers"></div>
         </p>
 
-        <h1>Chat</h1>
+        <h1>Chat / 聊天</h1>
         <textarea readonly id="chat" autocomplete="off" rows="10"></textarea>
-        <div><input id="input-chat" autocomplete="off"><button id="btn-send">Send</button></div>
+        <div><input id="input-chat" autocomplete="off"><button id="btn-send">Send / 发送</button></div>
     </div>
 
 
