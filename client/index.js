@@ -18,7 +18,8 @@ $(async function () {
   let dataChannels = new Map()
 
   let pcConfiguration = {
-    iceServers: []
+    iceServers: [],
+    iceTransportPolicy: "relay"
   }
 
   /** 
@@ -230,7 +231,7 @@ $(async function () {
     } else if (msg.type === "init") {
 
       id = msg.data.id
-      pcConfiguration.iceServers.push(msg.data["ice_server"])
+      pcConfiguration.iceServers.push(...msg.data["ice_server"])
       console.log("id", id)
       console.log("ice servers", pcConfiguration.iceServers)
 

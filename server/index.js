@@ -1,5 +1,6 @@
 const { WebSocketServer } = require("ws")
 const secret = require("./secret.js")
+const { createHmac } = require('node:crypto');
 
 console.log("voice chat server")
 
@@ -21,19 +22,40 @@ wss.on("connection", (ws) => {
 
     console.log("new connection", id)
 
-    if (PEER_CONFIGURATION && secret.PEER_CONFIGURATION.iceServers) {
+    if (secret.TURN === "coturn") {
         // static turn server
 
         console.log("using static stun/turn")
+
+        const username = Math.floor(+new Date() / 1000 + 60 * 60) + ":" + id;
+        const credential = createHmac("sha1", secret.COTURN_SECRET).update(username).digest("base64");
+
         ws.send(JSON.stringify({
             "type": "init",
             "data": {
                 "id": id,
-                "ice_server": secret.PEER_CONFIGURATION.iceServers
+                "ice_server": [
+                    {
+                        "urls": [
+                            "stun:turn.cloudflare.com",
+                            "stun:stun.miwifi.com",
+                            "stun:stun.chat.bilibili.com",
+                            "stun:stun1.l.google.com",
+                            "stun:stun2.l.google.com",
+                            "stun:stun3.l.google.com",
+                            "stun:stun4.l.google.com"
+                        ]
+                    },
+                    {
+                        "urls": secret.COTURN_SERVER,
+                        "username": username,
+                        "credential": credential
+                    }
+                ]
             }
         }))
 
-    } else {
+    } else if (secret.TURN === "cloudflare") {
         // cloudflare turn server
         fetch(`https://rtc.live.cloudflare.com/v1/turn/keys/${secret.CF_TOKEN_ID}/credentials/generate`, {
             method: "POST",
@@ -58,6 +80,8 @@ wss.on("connection", (ws) => {
                     }
                 }))
             })
+    } else {
+        throw new Error("bad `secret.TURN`");
     }
 
     
