@@ -1,5 +1,5 @@
 const { WebSocketServer } = require("ws")
-const { CF_TOKEN_ID, CF_API_TOKEN } = require("./secret")
+const secret = require("./secret.js")
 
 console.log("voice chat server")
 
@@ -21,28 +21,46 @@ wss.on("connection", (ws) => {
 
     console.log("new connection", id)
 
-    // cloudflare turn server
-    fetch(`https://rtc.live.cloudflare.com/v1/turn/keys/${CF_TOKEN_ID}/credentials/generate`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer " + CF_API_TOKEN
-        },
-        body: "{\"ttl\": 3600}"
-    })
-        .then(r => r.json())
-        .then(r => {
-            if (r.error) {
-                console.error("cloudflare turn", r, CF_TOKEN_ID)
+    if (PEER_CONFIGURATION && secret.PEER_CONFIGURATION.iceServers) {
+        // static turn server
+
+        console.log("using static stun/turn")
+        ws.send(JSON.stringify({
+            "type": "init",
+            "data": {
+                "id": id,
+                "ice_server": secret.PEER_CONFIGURATION.iceServers
             }
-            ws.send(JSON.stringify({
-                "type": "init",
-                "data": {
-                    "id": id,
-                    "ice_server": r["iceServers"]
-                }
-            }))
+        }))
+
+    } else {
+        // cloudflare turn server
+        fetch(`https://rtc.live.cloudflare.com/v1/turn/keys/${secret.CF_TOKEN_ID}/credentials/generate`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + secret.CF_API_TOKEN
+            },
+            body: "{\"ttl\": 3600}"
         })
+            .then(r => r.json())
+            .then(r => {
+                if (r.error) {
+                    console.error("cloudflare turn", r);
+                    return;
+                }
+                console.log("using cloudflare stun/turn")
+                ws.send(JSON.stringify({
+                    "type": "init",
+                    "data": {
+                        "id": id,
+                        "ice_server": r["iceServers"]
+                    }
+                }))
+            })
+    }
+
+    
 
     for (let [k, v] of clients.entries()) {
         if (k === id) continue;
